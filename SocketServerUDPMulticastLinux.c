@@ -1,3 +1,4 @@
+//this code is resided on the PDC as TCP socket server to provide the sensor data in the multicast manner
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
     char str[INET_ADDRSTRLEN];
     int ret;
 
+      // create the unicast socket for executing command from OSP
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == -1){
        printf("couldn't create UDP Server socket\n");
@@ -33,6 +35,7 @@ int main(int argc, char *argv[])
     memset(&cli_addr, 0, sizeof(cli_addr));
     memset(&multicast_addr, '0', sizeof(serv_addr));
     sockMultiCastfd = 0;
+     // create multicast socket for transport the sensor data
     sockMultiCastfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockMultiCastfd == -1){
        printf("couldn't create Multicast socket\n");
@@ -73,6 +76,8 @@ int main(int argc, char *argv[])
     if (ret>=0){
         buff[ret] = '\0'; 
 	printf("Client : %s\n", buff);
+
+        //PDC received the command from OSP and acknology
         ret = sendto(sockfd, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &cli_addr, len); 
         if (ret <0){
           printf("send Error\n");
@@ -83,8 +88,8 @@ int main(int argc, char *argv[])
           sleep(1);  
           close(sockfd);
 
-         //set local interface for outbound multicast datagram
-         localInterface.s_addr=inet_addr("169.254.144.82");
+         //set local interface for outbound multicast datagram, PDC IP =169.254.198.81
+         localInterface.s_addr=inet_addr("169.254.198.81");
          ret = setsockopt(sockMultiCastfd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface));
 	 if (ret < 0){
 	       printf("setting local interface for multicast udp is failed\n");
