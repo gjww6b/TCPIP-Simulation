@@ -1,11 +1,11 @@
 // EnDGTCPClient.cpp : Defines the entry point for the console application.
-//
+// this code is resided on OSP, it acts as TCPclient to request PDC, the TCP serve to send senor UDP data 
 
 #include "stdafx.h"
 
 #include <ws2tcpip.h>
 
-
+#define PORTMULTICAST 4321
 int sd, len, sdMulticast;
 struct sockaddr_in localSock, servAddr;
 int server_port = 13400;
@@ -14,6 +14,7 @@ char *sendbuffer="How are you?";
 char recvbuffer[100];
 char stIPAddress[20];
 const char *IPADDRESS="C:/IPADDRESS.txt";
+
 
 int WinsockInitialize(){
     int err;
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
 		printf("can't open the file!\n");
       //  strcpy(stIPAddress,"169.254.28.229");
 	} 
-	strcpy(stIPAddress,"169.254.144.82");
+	strcpy(stIPAddress,"169.254.198.81");// the PDC IP address
 	ret=WinsockInitialize();
 	if (ret==1){
   	    printf("WinsockInitializeError\n");
@@ -50,7 +51,7 @@ int main(int argc, char* argv[])
     }
   	printf("WinsockInitializeSuccess\n");
 
-   /* create socket */
+   /* create unicast socket for control */
     sd = socket(AF_INET, SOCK_DGRAM, 0);
 
     if(sd == INVALID_SOCKET){
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
        return 1;
 	}
 
-   /* create Multicast socket */
+   /* create Multicast socket to receive the sensor data */
 	sdMulticast = socket(AF_INET, SOCK_DGRAM, 0);
 
     if(sdMulticast == INVALID_SOCKET){
@@ -92,7 +93,7 @@ int main(int argc, char* argv[])
 		/* specified as INADDR_ANY. */
 		memset((char *) &localSock, 0, sizeof(localSock));
 		localSock.sin_family = AF_INET;
-		localSock.sin_port = htons(4321);
+		localSock.sin_port = htons(PORTMULTICAST);
 		localSock.sin_addr.s_addr = INADDR_ANY;
 		rc=bind(sdMulticast, (struct sockaddr*)&localSock, sizeof(localSock));
 	    if (rc == SOCKET_ERROR) {
@@ -106,8 +107,8 @@ int main(int argc, char* argv[])
 		/* interface. Note that this IP_ADD_MEMBERSHIP option must be */
 		/* called for each local interface over which the multicast */
 		/* datagrams are to be received. */
-		group.imr_multiaddr.s_addr = inet_addr("239.255.0.3");
-        group.imr_interface.s_addr = inet_addr("169.254.224.178");
+		group.imr_multiaddr.s_addr = inet_addr("239.255.0.3");     // the Sensor Data multicast address
+        group.imr_interface.s_addr = inet_addr("169.254.89.149");  // local IP, the OSP IP address
         rc = setsockopt(sdMulticast, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
 	    if (rc == SOCKET_ERROR) {
 		  printf("adding multicast group error: %d\n", WSAGetLastError());
