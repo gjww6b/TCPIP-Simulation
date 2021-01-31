@@ -1,4 +1,4 @@
-//this code is resided on the PDC as TCP socket server to provide the sensor data in the multicast manner
+//this code is resided on PC to emulate the Criuse
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
