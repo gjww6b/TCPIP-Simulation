@@ -5,7 +5,7 @@
 
 int sd;
 struct sockaddr_in localAddr, servAddr;
-int server_port = 13400;
+int server_port = 13401;
 char *sendbuffer="How are you?"; 
 char recvbuffer[100];
 char stIPAddress[20];
@@ -56,28 +56,33 @@ int main(int argc, char* argv[])
 	}
 	while(1){
 
-    servAddr.sin_family = AF_INET;
-  //  servAddr.sin_addr.s_addr = inet_addr("169.254.136.120");
+		servAddr.sin_family = AF_INET;
+	  //servAddr.sin_addr.s_addr = inet_addr("169.254.28.229");
+	  //servAddr.sin_addr.s_addr = inet_addr(stIPAddress);
+		servAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	  //servAddr.sin_addr.s_addr = inet_addr(???);
+		servAddr.sin_port = htons(server_port);
 
-//    servAddr.sin_addr.s_addr = inet_addr("169.254.28.115");
- //   servAddr.sin_addr.s_addr = inet_addr("169.254.28.229");
-    servAddr.sin_addr.s_addr = inet_addr(stIPAddress);
- //   servAddr.sin_addr.s_addr = inet_addr("169.254.41.13");
-//	    servAddr.sin_addr.s_addr = inet_addr("192.168.2.218");
-//	servAddr.sin_addr.s_addr = inet_addr(???);
+		rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
+		if (rc==SOCKET_ERROR ){
+			 wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
+			 closesocket(sd);
+			 WSACleanup();
+			 return 0;
+		}
+			// send how are u
+		rc = send(sd, sendbuffer, (int)strlen(sendbuffer), 0);
+		if (rc == SOCKET_ERROR) {
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(sd);
+			WSACleanup();
+			return 1;
+		}
+		printf("Bytes Sent: %ld\n", rc);
 
-  //    servAddr.sin_addr.s_addr = inet_addr(stIPAddress);
-    servAddr.sin_port = htons(server_port);
-    rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-    if (rc==SOCKET_ERROR ){
-		 wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
-         closesocket(sd);
-         WSACleanup();
-         return 0;
-    }
 		while (1){
 		// send how are u
-			rc = send(sd, sendbuffer, (int)strlen(sendbuffer), 0);
+		/*	rc = send(sd, sendbuffer, (int)strlen(sendbuffer), 0);
 			if (rc == SOCKET_ERROR) {
 				printf("send failed with error: %d\n", WSAGetLastError());
 				closesocket(sd);
@@ -85,6 +90,7 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 			printf("Bytes Sent: %ld\n", rc);
+		*/		
 		// receive message
 			rc = recv(sd, recvbuffer, 100, 0);
 
@@ -96,8 +102,8 @@ int main(int argc, char* argv[])
 				WSACleanup();
 				break;
 			}	 
-		}
-}
+		} // while
+	}
 	    // cleanup
     closesocket(sd);
     WSACleanup();
