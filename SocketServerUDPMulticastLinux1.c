@@ -1,4 +1,5 @@
-//this code is resided on PC to emulate the Criuse
+//this code is resided on the PDC as TCP socket server to provide the sensor data in the multicast manner
+//command line SocketServerUDPMulticastLinux1 MulticastIPAddress MulticastPort LocalIPaddreee
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9,8 +10,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h> 
-#define PORTMULTICAST     4321
+//#define PORTMULTICAST     4321
 #define MAXLINE 1024 
+int PORTMULTICAST=4321;
+char UDPMulticastIPAddress[20];
+char LocalIPAddress[20];
 int main(int argc, char *argv[])
 {
     int len, sockMultiCastfd; //sockfd = 0;
@@ -22,7 +26,11 @@ int main(int argc, char *argv[])
     char *SensorData ="Radar, Camera, LiDar, GPS, IMU, ultrasonic raw data.....";
     char str[INET_ADDRSTRLEN];
     int ret;
-
+    strcpy(UDPMulticastIPAddress,argv[1]);
+    PORTMULTICAST=atoi(argv[2]);
+    strcpy(LocalIPAddress,argv[3]);
+ 
+    printf("UDP Multicast IP address =%s, port = %d, Local IP=%s\n", UDPMulticastIPAddress,PORTMULTICAST,LocalIPAddress);
     memset(&multicast_addr, '0', sizeof(multicast_addr));
     sockMultiCastfd = 0;
      // create multicast socket for transport the sensor data
@@ -35,14 +43,16 @@ int main(int argc, char *argv[])
    	
    // fill the Multicast' info
     multicast_addr.sin_family = AF_INET;
-    multicast_addr.sin_addr.s_addr = inet_addr("239.255.0.3");
+  //  multicast_addr.sin_addr.s_addr = inet_addr("239.255.0.3");
+    multicast_addr.sin_addr.s_addr = inet_addr(UDPMulticastIPAddress);
     multicast_addr.sin_port = htons(PORTMULTICAST); 
 
  
     inet_ntop(AF_INET, &(multicast_addr.sin_addr), str, INET_ADDRSTRLEN);
     printf(" Multicase address is %s\n", str );
 
-     localInterface.s_addr=inet_addr("169.254.198.81");
+  //   localInterface.s_addr=inet_addr("169.254.198.81");
+       localInterface.s_addr=inet_addr(LocalIPAddress);
          ret = setsockopt(sockMultiCastfd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface));
 	 if (ret < 0){
                int errsv=errno;
