@@ -2,19 +2,21 @@
 // this code is resided on PC, it acts as UDP Clint to receive data from Crouse and transfor the TCP clint 
 
 #include "stdafx.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <ws2tcpip.h>
 
-#define PORTMULTICAST 4321
+int PORTMULTICAST =4321;
 int sd, len, sdMulticast, m_sock, m_newSock;
 struct sockaddr_in localSock, servAddr, m_servAddr;
-int server_port = 13400;
+//int server_port = 13400;
 int port = 13401;
 struct ip_mreq group;
 char *sendbuffer="How are you?"; 
 char recvbuffer[100];
-char stIPAddress[20];
-const char *IPADDRESS="C:/IPADDRESS.txt";
+char CruiseMultiCastIPAddress[20];
+char localIPAddress[20];
 char buffer1[100];
 
 int WinsockInitialize(){
@@ -33,17 +35,15 @@ int main(int argc, char* argv[])
 {
 	int ret, rc;
 	printf("Hello World!\n");
+
   
-	FILE * pFile=NULL;
-    pFile = fopen (IPADDRESS , "r");
-    if (pFile !=NULL) {
-        fgets (stIPAddress , 19 , pFile);
-        fclose (pFile);
-	}
-	else{
-		printf("can't open the file!\n");
-	} 
-//	strcpy(stIPAddress,"169.254.198.81");// the PDC IP address
+	strcpy(CruiseMultiCastIPAddress, argv[1]);// cruise IP address
+	strcpy(localIPAddress, argv[2]);   // local IP address
+	PORTMULTICAST=atoi(argv[3]);  // Cruise UDP port
+	port=atoi(argv[4]);    //tool's port
+
+	printf("Cruise IP address= %s  Local IP address=%s  Cruise's UDP Port= %d   Tool's Port= %d\n", CruiseMultiCastIPAddress, localIPAddress, PORTMULTICAST, port ); 
+
 	ret=WinsockInitialize();
 	if (ret==1){
   	    printf("WinsockInitializeError\n");
@@ -51,14 +51,6 @@ int main(int argc, char* argv[])
     }
   	printf("WinsockInitializeSuccess\n");
 
-   /* create unicast socket for control 
-    sd = socket(AF_INET, SOCK_DGRAM, 0);
-
-    if(sd == INVALID_SOCKET){
-       printf("socket failed with error: %ld\n", WSAGetLastError());
-       WSACleanup();
-       return 1;
-	}*/
 
    /* create Multicast socket to receive the sensor data */
 	sdMulticast = socket(AF_INET, SOCK_DGRAM, 0);
@@ -112,29 +104,6 @@ int main(int argc, char* argv[])
 		return 1;
     }
 
-
-     // control the crouse 
- /*   servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = inet_addr(stIPAddress);
-    servAddr.sin_port = htons(server_port);
-
-
-
-	rc= sendto(sd, sendbuffer, (int)strlen(sendbuffer), 0, (struct sockaddr *) &servAddr,  sizeof(servAddr)); 
-	if (rc == SOCKET_ERROR) {
-		printf("send failed with error: %d\n", WSAGetLastError());
-		closesocket(sd);
-		WSACleanup();
-	    return 1;
-	}*/
-/*	printf("Bytes Sent: %ld\n", rc);
-		// receive message
-//	len =sizeof(servAddr);
-//    rc = recvfrom(sd, (char *)recvbuffer, 100, 0, (struct sockaddr *) &servAddr, &len); 
-	
-    if ( rc > 0 ){
-	    printf("Bytes received: %d, %s \n", rc, recvbuffer);
-	    closesocket(sd);*/
 		/* Bind to the proper port number with the IP address */
 		/* specified as INADDR_ANY. */
 		memset((char *) &localSock, 0, sizeof(localSock));
@@ -149,12 +118,14 @@ int main(int argc, char* argv[])
 	      return 1;
         }
 		printf("Binding datagram socket...OK.\n");
-		/* Join the multicast group 226.1.1.1 on the local 203.106.93.94 */
+		/* Join the multicast group 239.225.0.3 on the local 169.254.89.149 */
 		/* interface. Note that this IP_ADD_MEMBERSHIP option must be */
 		/* called for each local interface over which the multicast */
 		/* datagrams are to be received. */
-		group.imr_multiaddr.s_addr = inet_addr("239.255.0.3");     // the Crouse Data multicast address
-        group.imr_interface.s_addr = inet_addr("169.254.89.149");  // local IP, the OSP IP address
+//		group.imr_multiaddr.s_addr = inet_addr("239.255.0.3");     // the Crouse Data multicast address
+		group.imr_multiaddr.s_addr = inet_addr(CruiseMultiCastIPAddress);     // the Crouse Data multicast address
+  //      group.imr_interface.s_addr = inet_addr("169.254.89.149");  // local IP, the OSP IP address
+		group.imr_interface.s_addr = inet_addr(localIPAddress);  // local IP, the OSP IP address
         rc = setsockopt(sdMulticast, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group));
 	    if (rc == SOCKET_ERROR) {
 		  printf("adding multicast group error: %d\n", WSAGetLastError());
