@@ -1,29 +1,42 @@
 # TCPIP-Simulation
+
+# TCPIP-Simulation
+
 This is the Criuse Tools for Eric Knutson.
+1. SocketServerUDPMulticastLinux1.c: Criuse Emulator.
+     local IP address: 169.254.198.81.
+     Multicast IP address: 239.255.0.3
+     Multicast Port: 4321
+     UDP payload: "Radar, Camera, LiDar, GPS, IMU, ultrasonic raw data....."
 
-1. EnDGUDPServer.cpp : Cruise emulator on Windows based PC: broadcast Cruise Data to 192.168.1.255 subnet at UDP 1534 port 
-     broadcasting subnet IP address: 192.168.1.255
-     UDP Port: 1534
-     UDP payload: "Cruise Data....."
+2. EnDGUDPMulticastClient1=>EnDGTCPClient1.cpp:  UDPtoTCP convert
+     TCP socket linked to Tera Term tool:
+     Bind to INADDR_LOOPBACK   "127.0.0.1" port: 13401)
 
-2. EnDGUDPReceiver.cpp : UDPtoTCPconverter to bridge the cruise data to acquisition tool
-     TCP socket linked to Tera Term tool via "127.0.0.1" at TCP port: 13400)
-     UDP Receiver listening on local IP address at UDP 1534 port
-     TCP Converter transforing on TCP socket
- 
+     UDP Multicast Receiver:
+     local IP address: 169.254.89.149
+     Join Multicast IP address: 239.255.0.3
+
 3. Tera Term Tool:
-      TCPIP: Host: 127.0.0.1; port:13400
+      TCPIP: Host: 127.0.0.1; port:13401
 
 
 How to run it:
 
 1. Run Criuse emulator:
-   On Windows machine command line:   EnDGUDPServer.exe
-  
+   On linux machine:  on command line:   SocketServerUDPMulticastLinux1.exe UDPMulticast_IPAddress UDPMulticast_Port Local_IPAddress
+    e.x:
+   On Windows machine: on command line:   EnDGUDPMulticastServer.exe UDPMulticast_IPAddress UDPMulticast_Port Local_IPAddress
+    e.x: EnDGUDPMulticastServer.exe 239.255.0.3 5432 169.254.89.149
+
 2. Run UDP2TCPConverter:
-   On Windows machine command line:   EnDGUDPReceiver.exe
+   On linux machine:  ??
+   On Windows machine: on command line:   EnDGTCPClient1.exe  UDPMulticast_IPAddress Local_IPAddress UDPMulticast_Port Tool_Port
+    e.x: EnDGTCPClient1.exe 239.255.0.3 5432 169.254.89.149 5432 13400
 
 3. Run Tera Term: TCPIP=127.0.0.1  Port=13400
+
+
 
 
 
