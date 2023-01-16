@@ -1,10 +1,9 @@
 // EnDGUDPMulticastServer.cpp : Defines the entry point for the console application.
-// this code simulates Cruise. it acts as Crouse to broadcast UDP package 
+// this code simulates PDC as TCP socket server to provider the sensor data in the multicast manner 
 
 #include "stdafx.h"
 #include <stdlib.h>
 #include <ws2tcpip.h>
-
 
 int sd, len, sdMulticast;
 struct sockaddr_in  servAddr, multicast_addr;
@@ -31,10 +30,11 @@ int WinsockInitialize(){
 int main(int argc, char* argv[])
 {
 	int ret, rc;
-	char *SensorData ="Radar, Camera, LiDar, GPS, IMU, ultrasonic raw data.....";
+//	char *SensorData ="Wheel Pulse from PDC-Front.....";
+    char *SensorData ="RTK from 5G moden";
+//	printf("PDC is here\n");
+ 	printf("RTK is here\n");
 
-	printf("Cruise is here\n");
-  
     strcpy(UDPMulticastIPAddress,argv[1]);
     PORTMULTICAST=atoi(argv[2]);
     strcpy(LocalIPAddress,argv[3]);
@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
         return 1;
     }
   	printf("WinsockInitializeSuccess\n");
-
-
+  
+  
    // create multicast socket for transport the sensor data*
 	sdMulticast = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
        WSACleanup();
        return 1;
 	}
+
   // fill the Multicast' info
     multicast_addr.sin_family = AF_INET;
     multicast_addr.sin_addr.s_addr = inet_addr(UDPMulticastIPAddress);
@@ -77,6 +78,7 @@ int main(int argc, char* argv[])
 	      return 1;
      }
      printf("Local Interface is setting for MultiCast UDP\n"); 
+
 //		len = sizeof(localSock);
 	 while(1){
 //		rc = sendto(sdMulticast, (const char *)SensorData, strlen(SensorData), 0, (const struct sockaddr *) &localSock, len); 
