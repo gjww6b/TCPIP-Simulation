@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 {
 	int ret, rc;
 //	char *SensorData ="Wheel Pulse from PDC-Front.....";
-    char *SensorData ="RTK from 5G moden";
+    char *SensorData ="RTK from 5G modem"; //17 octets
 //	printf("PDC is here\n");
  	printf("RTK is here\n");
 
