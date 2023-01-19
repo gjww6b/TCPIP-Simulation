@@ -1,29 +1,21 @@
 # TCPIP-Simulation
-This is the Criuse Tools for Eric Knutson.
+This is a Tool to simulate RTK over 5G to LabSat GNSS signal capture and replay bencn
 
-1. EnDGUDPServer.cpp : Cruise emulator on Windows based PC: broadcast Cruise Data to 192.168.1.255 subnet at UDP 1534 port 
+1. EnDGUDPMulticastServer.cpp : RTK emulator on Windows based PC: broadcast RTK Data to 192.168.1.255 subnet at UDP 13400 port 
      broadcasting subnet IP address: 192.168.1.255
-     UDP Port: 1534
-     UDP payload: "Cruise Data....."
+     UDP Port: 13400
+     UDP payload: "RTK from 5G modem"
 
-2. EnDGUDPReceiver.cpp : UDPtoTCPconverter to bridge the cruise data to acquisition tool
-     TCP socket linked to Tera Term tool via "127.0.0.1" at TCP port: 13400)
-     UDP Receiver listening on local IP address at UDP 1534 port
-     TCP Converter transforing on TCP socket
- 
-3. Tera Term Tool:
-      TCPIP: Host: 127.0.0.1; port:13400
 
 
 How to run it:
 
-1. Run Criuse emulator:
-   On Windows machine command line:   EnDGUDPServer.exe
+1. Run RTK emulator:
+   On PC1 Windows machine, set Ethernet MAC address:192.168.1.2
+on command line:   EnDGUDPMulticastServer.exe 192.168.1.255 13400 192.168.1.2
+EnDGUDPMulticastServer Boardcasting IP, UDP port, SIP
   
-2. Run UDP2TCPConverter:
-   On Windows machine command line:   EnDGUDPReceiver.exe
-
-3. Run Tera Term: TCPIP=127.0.0.1  Port=13400
+2. On PC2 Windows, run wireshark, Vehicle Spy Message  
 
 
 

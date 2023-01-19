@@ -1,5 +1,5 @@
 // EnDGUDPMulticastServer.cpp : Defines the entry point for the console application.
-// this code simulates PDC as TCP socket server to provider the sensor data in the multicast manner 
+// this code simulates RTK over 5G modom to provider the RTK data in the multicast manner 
 
 #include "stdafx.h"
 #include <stdlib.h>
@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 		  closesocket(sdMulticast);
 		  WSACleanup();
 	      return 1;
+
      }
      printf("Local Interface is setting for MultiCast UDP\n"); 
 
